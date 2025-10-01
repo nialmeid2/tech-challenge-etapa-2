@@ -2,10 +2,12 @@
 
 import { createAsyncThunk, createSlice, isAnyOf, WritableDraft } from "@reduxjs/toolkit";
 import { User } from "../../model/User";
-import { RootState } from "../store";
+import { createOperation, loadNextPage, getUserStatement, removeTransactionById, addFilters } from "./OperationsReducer";
+import { loadUserInvestments } from "./InvestmentsReducer";
+import { updateAccountInfo } from "./AccountReducer";
 
 export interface LoginState {
-    loggedUser: User,
+    loggedUser: SerializableUser,
     isLoading: boolean,
     errField: string,
     errMsg: PossibleErrMessages;
@@ -25,59 +27,27 @@ function addErrMessageInternally(state: WritableDraft<LoginState>, field: Possib
     state.errMsg[field] = msg;
 }
 
+export interface SerializableUser extends Omit<User, "createdAt"> {
+    createdAt: string
+}
+
 const loginSlice = createSlice({
     name: 'loginSlice',
     initialState: {
-        loggedUser: {} as User,
+        loggedUser: {} as SerializableUser,
         isLoading: false,
         errField: '',
         errMsg: defaultErrMsg()
     } as LoginState,
     reducers: {
-        resetErrMessages: (state) => {
+        resetLoginErrMessages: (state) => {
             state.errField = '',
                 state.errMsg = defaultErrMsg();
 
         },
-        addErrMessage: (state, action: { payload: { field: PossibleFields, msg: string } }) => {
+        addLoginErrMessage: (state, action: { payload: { field: PossibleFields, msg: string } }) => {
             addErrMessageInternally(state, action.payload.field, action.payload.msg);
-        },
-        // createNewUser: (state, action: {
-        //     payload: {
-        //         newUser: Omit<User, "id">, checkEmail: (email: string) => Promise<boolean>,
-        //         doSignUp: (user: Omit<User, "id">) => Promise<User>
-        //     }, type: string
-        // }) => {
-        //     const { doSignUp } = action.payload;
-
-        //     state.isLoading = true;
-        //     const attemptUser = action.payload.newUser!;
-
-        //     action.payload.checkEmail(attemptUser.email)
-        //         .then((exists) => {
-
-        //             if (exists) {
-        //                 addErrMessageInternally(state, 'email', `Já existe uma conta cadastrada com o e-mail ${attemptUser.email}`)
-        //                 return undefined;
-        //             }
-
-        //             return doSignUp(attemptUser)
-        //         })
-        //         .then((createdUser) => {
-        //             state.isLoading = false;
-
-        //             if (!createdUser) {
-        //                 return;
-        //             }
-
-        //             state.loggedUser = createdUser;
-        //         })
-        //         .catch((err) => {
-        //             state.isLoading = false;
-        //             console.log(err)
-        //         });
-
-        // },        
+        },    
     },
     extraReducers: (builder) => {
 
@@ -85,7 +55,7 @@ const loginSlice = createSlice({
             .addCase(attemptLogin.fulfilled, (state, { payload }) => {
 
                 if (payload) {
-                    state.loggedUser = { ...payload, createdAt: new Date(payload.createdAt) };
+                    state.loggedUser = payload;
                 }
                 else {
 
@@ -117,15 +87,24 @@ const loginSlice = createSlice({
                     return;
                 }
 
-                state.loggedUser = { ...action.payload, createdAt: new Date(action.payload.createdAt) };
+                state.loggedUser = action.payload;
 
             })
-            .addMatcher(isAnyOf(attemptLogin.pending, createNewUser.pending), (state) => {
+            .addCase(logoutUser.fulfilled, (state) => {
+                state.loggedUser = {} as SerializableUser
+            })
+            .addMatcher(isAnyOf(attemptLogin.pending, createNewUser.pending, logoutUser.pending, getUserStatement.pending, createOperation.pending,
+                loadNextPage.pending, removeTransactionById.pending, addFilters.pending, loadUserInvestments.pending, updateAccountInfo.pending
+            ), (state) => {
                 state.isLoading = true;
             })
-            .addMatcher(isAnyOf(attemptLogin.fulfilled, createNewUser.fulfilled, attemptLogin.rejected, createNewUser.rejected), (state) => {
-                state.isLoading = false;
-            })
+            .addMatcher(isAnyOf(attemptLogin.fulfilled, createNewUser.fulfilled, logoutUser.fulfilled, getUserStatement.fulfilled, createOperation.fulfilled, 
+                loadNextPage.fulfilled, removeTransactionById.fulfilled, addFilters.fulfilled, loadUserInvestments.fulfilled, updateAccountInfo.fulfilled,
+                attemptLogin.rejected, createNewUser.rejected, logoutUser.rejected, getUserStatement.rejected, createOperation.rejected, 
+                loadNextPage.rejected, removeTransactionById.rejected, addFilters.rejected, loadUserInvestments.rejected, updateAccountInfo.rejected),
+                (state) => {
+                    state.isLoading = false;
+                })
     }
 
 })
@@ -180,7 +159,14 @@ export const createNewUser = createAsyncThunk(
     },
 )
 
-export const { resetErrMessages, addErrMessage } = loginSlice.actions; // as actions vêem dos reducers
+export const logoutUser = createAsyncThunk(
+    "user/logout",
+    async (payload: {clearLoggedUser: () => Promise<void>}) => {
+        await payload.clearLoggedUser();
+    }
+)
+
+export const { resetLoginErrMessages, addLoginErrMessage } = loginSlice.actions; // as actions vêem dos reducers
 
 
 export default loginSlice.reducer;

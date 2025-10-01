@@ -1,0 +1,285 @@
+import { createAsyncThunk, createSlice, isAnyOf, WritableDraft } from "@reduxjs/toolkit";
+import { Transaction } from "../../model/Transaction";
+import { SerializableUser } from "./LoginReducer";
+import { User } from "../../model/User";
+import { transactionsPerPage, TransactionTypes } from "../../model/enums/Transaction";
+import { loadPageInfo } from "../../serverActions";
+import { updateAccountInfo } from "./AccountReducer";
+
+export interface SerializableTransaction extends Omit<Transaction, "createdAt"> {
+    createdAt: string
+}
+
+export interface OperationsState {
+    statetement: SerializableTransaction[],
+    isMenuOpen: boolean,
+    transactions: SerializableTransaction[],
+    sessionUser: SerializableUser,
+    filterOptions: {
+        alreadyEnded: boolean,
+        currPage: number,
+        lastFilters: { date: Date | undefined, type: TransactionTypes | undefined },
+        transactionsPerPage: number
+    }
+    errFields: {
+        transactionType: string,
+        value: string
+    }
+    errList: Record<number, string>
+}
+
+type PossibleFields = 'transactionType' | 'value';
+
+function defaultFields() {
+    return { transactionType: '', value: '' }
+}
+
+function addNewErrField(state: WritableDraft<OperationsState>, field: PossibleFields, value: string) {
+    state.errFields[field] = value;
+}
+
+const operationSlice = createSlice({
+    name: 'operations',
+    initialState: {
+        statetement: [],
+        transactions: [],
+        isMenuOpen: false,
+        sessionUser: {} as SerializableUser,
+        filterOptions: {
+            alreadyEnded: false,
+            currPage: 1,
+            lastFilters: { date: undefined, type: undefined },
+            transactionsPerPage: transactionsPerPage
+        },
+        errFields: defaultFields(),
+        errList: {}
+    } as OperationsState,
+    reducers: {
+        toggleMenu: (state) => {
+            state.isMenuOpen = !state.isMenuOpen;
+        },
+        closeMenu: (state) => {
+            state.isMenuOpen = false;
+        },
+        resetErrFields: (state) => {
+            state.errFields = defaultFields();
+        },
+        addErrField: (state, action: { payload: { field: PossibleFields, value: string } }) => {
+            addNewErrField(state, action.payload.field, action.payload.value);
+        }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(getUserStatement.fulfilled, (state, action) => {
+                state.statetement = action.payload.statement;
+                state.sessionUser = action.payload.loggedUser;
+            })
+            .addCase(createOperation.fulfilled, (state, action) => {
+                state.statetement = action.payload.statement;
+                state.sessionUser = action.payload.loggedUser;
+            })
+            .addCase(loadNextPage.fulfilled, (state, action) => {
+                const newTransactions = action.payload;
+                if (newTransactions.length == 0 || newTransactions.length % transactionsPerPage != 0)
+                    state.filterOptions.alreadyEnded = true;
+
+                state.transactions = [...state.transactions, ...newTransactions]
+                state.filterOptions.currPage += 1;
+            })
+            .addCase(removeTransactionById.fulfilled, (state, action) => {
+                const stmt = action.payload;
+
+                if ((stmt as ErrorStmt)?.msg) {
+                    const newErrList = {} as Record<number, string>;
+                    const err = stmt as ErrorStmt;
+                    newErrList[err.id] = err.msg;
+                    state.errList = newErrList;
+                    return;
+                }
+
+                state.errList = {};
+                state.statetement = (action.payload as SerializableInfoWithId).statement;
+                state.sessionUser = (action.payload as SerializableInfoWithId).loggedUser;
+                state.transactions = state.transactions.filter((tobj) => tobj.id != action.payload.id)
+            })
+            .addCase(addFilters.pending, (state) => {
+                state.filterOptions.lastFilters = { date: undefined, type: undefined }
+                state.filterOptions.alreadyEnded = false;
+            })
+            .addCase(addFilters.fulfilled, (state, action) => {
+                
+                state.filterOptions.currPage = 1;
+                state.filterOptions.lastFilters = action.payload.filters;
+
+                if (action.payload.transactions.length % transactionsPerPage != 0)
+                    state.filterOptions.alreadyEnded = true;
+
+                state.transactions = action.payload.transactions;
+                
+            })
+            .addCase(updateAccountInfo.fulfilled, (state, action) => {
+                const { newName } = action.payload;
+                
+                if (newName)
+                    state.sessionUser.name = newName;
+            })
+            .addMatcher(isAnyOf(getUserStatement.rejected, createOperation.rejected, loadNextPage.rejected, removeTransactionById.rejected,
+                addFilters.rejected),
+                (state, action) => {
+                    console.error(action.error);
+                })
+    }
+})
+
+export const getUserStatement = createAsyncThunk(
+    "operation/userStatement",
+    async (payload: {
+        loadPageInfo: () => Promise<{
+            statement: Transaction[];
+            loggedUser: {
+                password: string;
+                id: number;
+                name: string;
+                email: string;
+                balance: number;
+                createdAt: Date;
+            };
+        }>
+    }) => {
+        const pageInfo = await payload.loadPageInfo();
+
+        return getSerializablePageInfo(pageInfo);
+    }
+);
+
+
+export const createOperation = createAsyncThunk(
+    "operation/create",
+    async (payload: {
+        user: User,
+        transaction: Omit<Transaction, "id">,
+        createATransactionOperation: (user: User, transactionObject: Omit<Transaction, "id">) => Promise<void>,
+        loadPageInfo: () => Promise<{
+            statement: Transaction[];
+            loggedUser: {
+                password: string;
+                id: number;
+                name: string;
+                email: string;
+                balance: number;
+                createdAt: Date;
+            };
+        }>
+    }) => {
+        await payload.createATransactionOperation(payload.user, payload.transaction);
+
+        const pageInfo = await payload.loadPageInfo();
+
+        return getSerializablePageInfo(pageInfo);
+    }
+)
+
+export const loadNextPage = createAsyncThunk(
+    "operations/filter",
+    async (payload: {
+        user: User, lastFilters: { date: Date | undefined, type: TransactionTypes | undefined },
+        currPage: number,
+        filterTransactions: (userId: number, date: Date | undefined, transactionType: TransactionTypes | undefined, page: number) => Promise<Transaction[]>
+    }) => {
+
+        const transactions = await payload.filterTransactions(payload.user?.id ?? 0, payload.lastFilters.date, payload.lastFilters.type, payload.currPage + 1);
+
+        return transactions.map((t) => ({...t, createdAt: t.createdAt.toISOString()}))
+
+    }
+)
+
+export const removeTransactionById = createAsyncThunk(
+    "operations/removeById",
+    async (payload: {
+        id: number,
+        removeTransaction: (transactionId: number) => Promise<string>,
+        loadPageInfo: () => Promise<{
+            statement: Transaction[];
+            loggedUser: {
+                password: string;
+                id: number;
+                name: string;
+                email: string;
+                balance: number;
+                createdAt: Date;
+            };
+        }>
+    }) => {
+        const stmt = await payload.removeTransaction(payload.id);
+
+        if (stmt)
+            return { msg: stmt, id: payload.id } as ErrorStmt;
+
+        const pageInfo = await payload.loadPageInfo();
+
+
+
+        return { ...getSerializablePageInfo(pageInfo), id: payload.id } as SerializableInfoWithId;
+
+    }
+)
+
+export const addFilters = createAsyncThunk(
+    "operations/newFilters",
+    async (payload: {
+        filterTransactions: (userId: number, date: Date | undefined, transactionType: TransactionTypes | undefined, page: number) => Promise<Transaction[]>,
+        user: User,
+        lastFilters: { date: Date | undefined, type: TransactionTypes | undefined }
+    }) => {
+
+        const { filterTransactions, user, lastFilters } = payload;
+
+        const transactions = await filterTransactions(user?.id ?? 0, lastFilters.date, lastFilters.type, 1);
+        const serializableTransactions = transactions.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() }))
+
+        return { transactions: serializableTransactions, filters: lastFilters }
+
+    }
+)
+
+interface SerializableInfoWithId extends SerializablePageInfo {
+    id: number
+}
+
+interface ErrorStmt {
+    msg: string,
+    id: number
+}
+
+function getSerializablePageInfo(pageInfo: {
+    statement: Transaction[];
+    loggedUser: {
+        password: string;
+        id: number;
+        name: string;
+        email: string;
+        balance: number;
+        createdAt: Date;
+    };
+}) {
+    const returnedUser = { ...pageInfo.loggedUser, createdAt: pageInfo.loggedUser.createdAt.toISOString() };
+    const returnedStatement = pageInfo.statement.map((s) => { return { ...s, createdAt: s.createdAt.toISOString() } })
+
+    return { statement: returnedStatement, loggedUser: returnedUser }
+}
+
+export interface Serializabletransaction extends Omit<Transaction, "createdAt"> {
+    createdAt: string
+}
+
+export interface SerializablePageInfo {
+    statement: SerializableTransaction[],
+    loggedUser: SerializableUser
+}
+
+
+export const { toggleMenu, closeMenu, addErrField } = operationSlice.actions
+
+const operationsReducer = operationSlice.reducer;
+export default operationsReducer;

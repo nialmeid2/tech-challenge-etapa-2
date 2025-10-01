@@ -12,7 +12,7 @@ export enum TransactionTypes {
 
 export const AdditiveTransactions = [TransactionTypes.DEPOSIT, TransactionTypes.INCOME, TransactionTypes.INTEREST]
 
-export const SubstrativeTransactions = [
+export const SubtractiveTransactions = [
     TransactionTypes.WITHDRAW, TransactionTypes.TRANSFER, TransactionTypes.INVESTIMENT_FUNDS, TransactionTypes.DIRECT_TREASURY,
     TransactionTypes.PRIVATE_RETIREMENT, TransactionTypes.STOCKS
 ]

@@ -2,7 +2,7 @@
 
 import db from "../db/db";
 import { User } from "../generated/prisma";
-import { AdditiveTransactions, SubstrativeTransactions, transactionsPerPage, TransactionTypes } from "./enums/Transaction";
+import { AdditiveTransactions, SubtractiveTransactions, transactionsPerPage, TransactionTypes } from "./enums/Transaction";
 
 
 export interface Transaction {
@@ -106,9 +106,9 @@ export async function addAdditiveOperation(user: User, transaction: Omit<Transac
 }
 
 
-export async function addSubstrativeOperation(user: User, transaction: Omit<Transaction, "id">) {
+export async function addSubtractiveOperation(user: User, transaction: Omit<Transaction, "id">) {
     "use server"
-    if (!SubstrativeTransactions.includes(transaction.type))
+    if (!SubtractiveTransactions.includes(transaction.type))
         return false;
 
     if (user.balance < transaction.value)
@@ -170,7 +170,7 @@ export async function removeATransaction(transactionId: number) {
                 data: {balance: newBalance}
             })
 
-        } else if (SubstrativeTransactions.includes(prevTransaction.type as TransactionTypes)) {
+        } else if (SubtractiveTransactions.includes(prevTransaction.type as TransactionTypes)) {
 
             const newBalance = theUser.balance + prevTransaction.value; // reimburse the money
 

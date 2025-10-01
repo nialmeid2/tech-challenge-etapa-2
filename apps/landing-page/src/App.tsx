@@ -7,12 +7,12 @@ import ButtonSecondary from "@repo/ui/components/ButtonSecondary"
 import Container from "@repo/ui/components/Container"
 import LoadingScreen from "@repo/ui/components/LoadingScreen"
 import { User } from "@repo/ui/model/User"
-import { redirect, RedirectType } from "next/navigation"
+import { redirect, RedirectType, useRouter } from "next/navigation"
 import { FormEvent, useEffect, useRef, useState } from "react"
 import HomeHeader from "./Header"
 import HomeFooter from "./Footer"
 import { isPassSecure } from "@repo/ui/model/utils/str"
-import { addErrMessage, createNewUser, resetErrMessages, attemptLogin } from "@repo/ui/store/reducers/LoginReducer"
+import { addLoginErrMessage, createNewUser, resetLoginErrMessages, attemptLogin } from "@repo/ui/store/reducers/LoginReducer"
 import { useAppSelector } from "@repo/ui/store/store"
 import { useDispatch } from "react-redux"
 
@@ -26,11 +26,12 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
     const [modalNewAccountVisible, setModalNewAccountVisible] = useState(false);
     const [modalLoginVisible, setModalLoginVisible] = useState(false);
     //const { setIsLoading, loginCreatedUser, user: loggedUser } = useSelector()
-    const isLoading = useAppSelector((s) => s.loginSlice.isLoading);
+
     const loggedUser = useAppSelector((s) => s.loginSlice.loggedUser);
     const errField = useAppSelector((s) => s.loginSlice.errField);
     const errMsg = useAppSelector((s) => s.loginSlice.errMsg);
     const dispatch = useDispatch();
+    const router = useRouter();
 
     const nameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
@@ -39,10 +40,12 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
     const passRef = useRef<HTMLInputElement>(null);
 
 
+
+
     function submitNewAccount(e: FormEvent<HTMLFormElement>) {
         e.preventDefault(); // no submitting!
 
-        dispatch(resetErrMessages());
+        dispatch(resetLoginErrMessages());
 
         let isValid = true;
 
@@ -53,25 +56,25 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
         } as Omit<User, "id">
 
         if (!newUser.name?.trim()) {
-            dispatch(addErrMessage({ field: 'name', msg: 'O nome é obrigatório' }))
+            dispatch(addLoginErrMessage({ field: 'name', msg: 'O nome é obrigatório' }))
             isValid = false;
         }
         if (!newUser.email?.trim()) {
-            dispatch(addErrMessage({ field: 'email', msg: 'O e-mail é obrigatório' }))
+            dispatch(addLoginErrMessage({ field: 'email', msg: 'O e-mail é obrigatório' }))
             isValid = false;
         } else if (!/.+\@.+\..+/gi.test(newUser.email)) {
-            dispatch(addErrMessage({ field: 'email', msg: 'O e-mail deve ter o formato exemplo@dominio.com' }))
+            dispatch(addLoginErrMessage({ field: 'email', msg: 'O e-mail deve ter o formato exemplo@dominio.com' }))
             isValid = false;
         }
 
         if (!newUser.password) {
 
-            dispatch(addErrMessage({ field: 'newPass', msg: 'A senha é obrigatória' }))
+            dispatch(addLoginErrMessage({ field: 'newPass', msg: 'A senha é obrigatória' }))
 
             isValid = false;
         } else if (!isPassSecure(newUser.password)) {
 
-            dispatch(addErrMessage({ field: 'newPass', msg: 'A senha deve conter 8 ou mais caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial' }))
+            dispatch(addLoginErrMessage({ field: 'newPass', msg: 'A senha deve conter 8 ou mais caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial' }))
 
             isValid = false;
         }
@@ -79,7 +82,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
         if (!isValid)
             return;
 
-        
+
 
         dispatch(createNewUser({ newUser, checkEmail, doSignUp }) as any);
 
@@ -89,7 +92,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
     function submitLogin(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
 
-        dispatch(resetErrMessages());
+        dispatch(resetLoginErrMessages());
 
         let isValid = true;
         const loginInfo = {
@@ -97,25 +100,25 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
             pass: passRef.current?.value
         }
 
-        
+
 
         if (!loginInfo.email) {
-            
-            dispatch(addErrMessage({ field: 'login', msg: 'O e-mail é obrigatório' }))
+
+            dispatch(addLoginErrMessage({ field: 'login', msg: 'O e-mail é obrigatório' }))
             isValid = false;
         }
         if (!loginInfo.pass) {
 
-            dispatch(addErrMessage({ field: 'pass', msg: 'A senha é obrigatória' }))
+            dispatch(addLoginErrMessage({ field: 'pass', msg: 'A senha é obrigatória' }))
             isValid = false;
         }
 
         if (!isValid)
             return;
 
-        dispatch(attemptLogin({email: loginInfo.email!, pass: loginInfo.pass!, doLogin}) as any);
+        dispatch(attemptLogin({ email: loginInfo.email!, pass: loginInfo.pass!, doLogin }) as any);
 
-        
+
     }
 
     function emptyFields() {
@@ -125,17 +128,17 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
         loginRef.current!.value = "";
         passRef.current!.value = "";
 
-        
 
-        dispatch(resetErrMessages())
+
+        dispatch(resetLoginErrMessages())
     }
-
 
 
     useEffect(() => {
         if (loggedUser?.id)
-            redirect('/dashboard', RedirectType.replace);
-    }, [loggedUser])
+            location.replace('/dashboard')
+    });
+
 
     return <div className="flex-1 flex flex-col">
 

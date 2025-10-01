@@ -6,45 +6,15 @@ import { redirect, RedirectType } from "next/navigation";
 import { getStatement } from "@repo/ui/model/Transaction";
 
 import StoreAppWrapper from "@/src/StoreAppWrapper";
+import { getLoggedUser } from "@repo/ui/serverActions";
 
 export default async function Home() {
 
-    async function getLoggedUser() {
-        "use server";
-
-        const theCookies = await cookies();
-        return getUserCookie(theCookies);
-    }
-
-    async function clearLoggedUser() {
-        "use server"
-
-        const theCookies = await cookies();
-        theCookies.delete('user');
-    }
-
-
+    
+    
     const cachedUser = await getLoggedUser();
 
-
-    async function loadPageInfo() {
-        "use server"
-
-        const loggedUser = await getUserCookie(await cookies());
-
-        if (!loggedUser) {
-            redirect('/', RedirectType.replace)
-        }
-
-        const refreshedData = await getRefreshedData(loggedUser.id) ?? loggedUser;
-
-        const refreshedUser = { ...refreshedData, password: '', id: loggedUser.id }
-
-        const statement = await getStatement(loggedUser.id, 5,)
-
-        return { statement, loggedUser: refreshedUser }
-    }
-
+    
     async function doLogin(email: string, password: string) {
         "use server"
 
@@ -69,7 +39,7 @@ export default async function Home() {
 
         try {
             const createdUser = await createUser(user);
-            console.log(createdUser)
+            
             await createUserCookie((await cookies()), createdUser);
             return createdUser;
         } catch (err) {
@@ -88,6 +58,10 @@ export default async function Home() {
             console.log(err);
             throw err;
         }
+    }
+
+    if (cachedUser?.id) {
+        redirect('/dashboard', RedirectType.replace)
     }
 
     return (
