@@ -3,7 +3,7 @@ import { Transaction } from "../../model/Transaction";
 import { SerializableUser } from "./LoginReducer";
 import { User } from "../../model/User";
 import { transactionsPerPage, TransactionTypes } from "../../model/enums/Transaction";
-import { loadPageInfo } from "../../serverActions";
+import { LoadedPageInfo, loadPageInfo, MainPageInfo } from "../../serverActions";
 import { updateAccountInfo } from "./AccountReducer";
 
 export interface SerializableTransaction extends Omit<Transaction, "createdAt"> {
@@ -18,20 +18,30 @@ export interface OperationsState {
     filterOptions: {
         alreadyEnded: boolean,
         currPage: number,
-        lastFilters: { date: Date | undefined, type: TransactionTypes | undefined },
+        lastFilters: { date: string | undefined, type: TransactionTypes | undefined },
         transactionsPerPage: number
     }
     errFields: {
         transactionType: string,
-        value: string
+        value: string,
+        img: string
     }
     errList: Record<number, string>
+    graphData: {
+        labels: string[],
+        datasets: {
+            label: string,
+            data: number[],
+            backgroundColor: string[],
+            hoverOffset: number
+        }[]
+    } | undefined;
 }
 
-type PossibleFields = 'transactionType' | 'value';
+type PossibleFields = 'transactionType' | 'value' | `img`;
 
 function defaultFields() {
-    return { transactionType: '', value: '' }
+    return { transactionType: '', value: '', img: '' }
 }
 
 function addNewErrField(state: WritableDraft<OperationsState>, field: PossibleFields, value: string) {
@@ -52,7 +62,8 @@ const operationSlice = createSlice({
             transactionsPerPage: transactionsPerPage
         },
         errFields: defaultFields(),
-        errList: {}
+        errList: {},
+        graphData: undefined
     } as OperationsState,
     reducers: {
         toggleMenu: (state) => {
@@ -63,6 +74,7 @@ const operationSlice = createSlice({
         },
         resetErrFields: (state) => {
             state.errFields = defaultFields();
+            state.errList = {};
         },
         addErrField: (state, action: { payload: { field: PossibleFields, value: string } }) => {
             addNewErrField(state, action.payload.field, action.payload.value);
@@ -70,14 +82,6 @@ const operationSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(getUserStatement.fulfilled, (state, action) => {
-                state.statetement = action.payload.statement;
-                state.sessionUser = action.payload.loggedUser;
-            })
-            .addCase(createOperation.fulfilled, (state, action) => {
-                state.statetement = action.payload.statement;
-                state.sessionUser = action.payload.loggedUser;
-            })
             .addCase(loadNextPage.fulfilled, (state, action) => {
                 const newTransactions = action.payload;
                 if (newTransactions.length == 0 || newTransactions.length % transactionsPerPage != 0)
@@ -98,8 +102,10 @@ const operationSlice = createSlice({
                 }
 
                 state.errList = {};
+                state.errFields = defaultFields()
                 state.statetement = (action.payload as SerializableInfoWithId).statement;
                 state.sessionUser = (action.payload as SerializableInfoWithId).loggedUser;
+                state.graphData = (action.payload as SerializableInfoWithId).graphData
                 state.transactions = state.transactions.filter((tobj) => tobj.id != action.payload.id)
             })
             .addCase(addFilters.pending, (state) => {
@@ -107,7 +113,7 @@ const operationSlice = createSlice({
                 state.filterOptions.alreadyEnded = false;
             })
             .addCase(addFilters.fulfilled, (state, action) => {
-                
+
                 state.filterOptions.currPage = 1;
                 state.filterOptions.lastFilters = action.payload.filters;
 
@@ -115,14 +121,24 @@ const operationSlice = createSlice({
                     state.filterOptions.alreadyEnded = true;
 
                 state.transactions = action.payload.transactions;
-                
+
             })
             .addCase(updateAccountInfo.fulfilled, (state, action) => {
                 const { newName } = action.payload;
-                
+
                 if (newName)
                     state.sessionUser.name = newName;
             })
+            .addCase(createOperation.pending, (state) => {
+                state.errFields = defaultFields();
+                state.errList = {};                
+            })
+            .addMatcher(isAnyOf(getUserStatement.fulfilled, createOperation.fulfilled),
+                (state, action) => {
+                    state.statetement = action.payload.statement;
+                    state.sessionUser = action.payload.loggedUser;
+                    state.graphData = action.payload.graphData;
+                })
             .addMatcher(isAnyOf(getUserStatement.rejected, createOperation.rejected, loadNextPage.rejected, removeTransactionById.rejected,
                 addFilters.rejected),
                 (state, action) => {
@@ -134,17 +150,7 @@ const operationSlice = createSlice({
 export const getUserStatement = createAsyncThunk(
     "operation/userStatement",
     async (payload: {
-        loadPageInfo: () => Promise<{
-            statement: Transaction[];
-            loggedUser: {
-                password: string;
-                id: number;
-                name: string;
-                email: string;
-                balance: number;
-                createdAt: Date;
-            };
-        }>
+        loadPageInfo: () => LoadedPageInfo
     }) => {
         const pageInfo = await payload.loadPageInfo();
 
@@ -159,17 +165,7 @@ export const createOperation = createAsyncThunk(
         user: User,
         transaction: Omit<Transaction, "id">,
         createATransactionOperation: (user: User, transactionObject: Omit<Transaction, "id">) => Promise<void>,
-        loadPageInfo: () => Promise<{
-            statement: Transaction[];
-            loggedUser: {
-                password: string;
-                id: number;
-                name: string;
-                email: string;
-                balance: number;
-                createdAt: Date;
-            };
-        }>
+        loadPageInfo: () => LoadedPageInfo
     }) => {
         await payload.createATransactionOperation(payload.user, payload.transaction);
 
@@ -189,7 +185,7 @@ export const loadNextPage = createAsyncThunk(
 
         const transactions = await payload.filterTransactions(payload.user?.id ?? 0, payload.lastFilters.date, payload.lastFilters.type, payload.currPage + 1);
 
-        return transactions.map((t) => ({...t, createdAt: t.createdAt.toISOString()}))
+        return transactions.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() }))
 
     }
 )
@@ -199,17 +195,7 @@ export const removeTransactionById = createAsyncThunk(
     async (payload: {
         id: number,
         removeTransaction: (transactionId: number) => Promise<string>,
-        loadPageInfo: () => Promise<{
-            statement: Transaction[];
-            loggedUser: {
-                password: string;
-                id: number;
-                name: string;
-                email: string;
-                balance: number;
-                createdAt: Date;
-            };
-        }>
+        loadPageInfo: () => LoadedPageInfo
     }) => {
         const stmt = await payload.removeTransaction(payload.id);
 
@@ -238,7 +224,7 @@ export const addFilters = createAsyncThunk(
         const transactions = await filterTransactions(user?.id ?? 0, lastFilters.date, lastFilters.type, 1);
         const serializableTransactions = transactions.map((t) => ({ ...t, createdAt: t.createdAt.toISOString() }))
 
-        return { transactions: serializableTransactions, filters: lastFilters }
+        return { transactions: serializableTransactions, filters: { ...lastFilters, date: lastFilters.date?.toISOString() } }
 
     }
 )
@@ -252,21 +238,13 @@ interface ErrorStmt {
     id: number
 }
 
-function getSerializablePageInfo(pageInfo: {
-    statement: Transaction[];
-    loggedUser: {
-        password: string;
-        id: number;
-        name: string;
-        email: string;
-        balance: number;
-        createdAt: Date;
-    };
-}) {
+function getSerializablePageInfo(pageInfo: MainPageInfo) {
     const returnedUser = { ...pageInfo.loggedUser, createdAt: pageInfo.loggedUser.createdAt.toISOString() };
     const returnedStatement = pageInfo.statement.map((s) => { return { ...s, createdAt: s.createdAt.toISOString() } })
+    const graphData = pageInfo.graphData;
 
-    return { statement: returnedStatement, loggedUser: returnedUser }
+
+    return { statement: returnedStatement, loggedUser: returnedUser, graphData }
 }
 
 export interface Serializabletransaction extends Omit<Transaction, "createdAt"> {
@@ -275,7 +253,16 @@ export interface Serializabletransaction extends Omit<Transaction, "createdAt"> 
 
 export interface SerializablePageInfo {
     statement: SerializableTransaction[],
-    loggedUser: SerializableUser
+    loggedUser: SerializableUser,
+    graphData: {
+        labels: string[];
+        datasets: {
+            label: string;
+            data: number[];
+            backgroundColor: string[];
+            hoverOffset: number;
+        }[];
+    }
 }
 
 

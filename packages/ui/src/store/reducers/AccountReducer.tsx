@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { Transaction } from "../../model/Transaction";
 import { getUserStatement } from "./OperationsReducer";
+import { LoadedPageInfo } from "../../serverActions";
 
 export interface AccountState {
     errFields: ReturnType<typeof defaultErrFields>,
@@ -62,23 +63,13 @@ export const updateAccountInfo = createAsyncThunk(
         newName: string,
         newPass: string,
         updateUserInfo: (id: number, name: string, pass: string) => Promise<void>,
-        loadPageInfo: () => Promise<{
-            statement: Transaction[];
-            loggedUser: {
-                password: string;
-                id: number;
-                name: string;
-                email: string;
-                balance: number;
-                createdAt: Date;
-            };
-        }>
+        //loadPageInfo: () => LoadedPageInfo
     }) => {
 
-        const { updateUserInfo, loadPageInfo, id, newName, newPass } = payload
+        const { updateUserInfo, id, newName, newPass } = payload
 
         await updateUserInfo(id, newName, newPass);
-        await loadPageInfo();
+        //await loadPageInfo();
 
         return { newName, newPass: newPass ? 'a changed password' : '' };
     }

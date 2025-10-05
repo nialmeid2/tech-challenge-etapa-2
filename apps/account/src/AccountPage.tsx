@@ -2,27 +2,17 @@
 
 import ButtonSecondary from "@repo/ui/components/ButtonSecondary/index";
 import Input from "@repo/ui/components/Input/index";
-import { Transaction } from "@repo/ui/model/Transaction";
 import { isPassSecure } from "@repo/ui/model/utils/str.ts";
+import { LoadedPageInfo } from "@repo/ui/serverActions/index";
 import { resetAccountErrFields, setAccountErrField, updateAccountInfo } from "@repo/ui/store/reducers/AccountReducer";
 import { AppDispatch, useAppSelector } from "@repo/ui/store/store";
-import { FormEvent, useContext, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 
 export default function AccountPage({ updateUserInfo, loadPageInfo }: {
     updateUserInfo: (id: number, name: string, pass: string) => Promise<void>,
-    loadPageInfo: () => Promise<{
-        statement: Transaction[];
-        loggedUser: {
-            password: string;
-            id: number;
-            name: string;
-            email: string;
-            balance: number;
-            createdAt: Date;
-        };
-    }>
+    loadPageInfo: () => LoadedPageInfo
 }) {
 
     const nameRef = useRef<HTMLInputElement>(null);
@@ -67,7 +57,7 @@ export default function AccountPage({ updateUserInfo, loadPageInfo }: {
         if (newName == lastName && !newPass)
             return; // no need to call the database
 
-        dispatch(updateAccountInfo({ id: user.id, newName: newName!, newPass: newPass ?? '', loadPageInfo, updateUserInfo})).then(() => {
+        dispatch(updateAccountInfo({ id: user.id, newName: newName!, newPass: newPass ?? '', updateUserInfo})).then(() => {
             passRef.current!.value = ''
         });
 

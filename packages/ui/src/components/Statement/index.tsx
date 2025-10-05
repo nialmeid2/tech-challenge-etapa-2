@@ -1,10 +1,14 @@
 import { useEffect } from "react";
-import { SubtractiveTransactions, TransactionTypes } from "../../model/enums/Transaction"
+import { SubtractiveTransactions, transactionsPerPage, TransactionTypes } from "../../model/enums/Transaction"
 import { Transaction } from "../../model/Transaction"
 import { initCapSentence, toMoney } from "../../model/utils/str"
 import { AppDispatch, useAppSelector } from "../../store/store"
 import { useDispatch } from "react-redux";
 import { getUserStatement } from "../../store/reducers/OperationsReducer";
+import BarChart from "../ChartRender/BarChart";
+import PieChart from "../ChartRender/PieChart";
+import DoughnutChart from "../ChartRender/DoughnutChart";
+
 
 
 
@@ -19,14 +23,25 @@ export default function Statement({ loadPageInfo }: {
             balance: number;
             createdAt: Date;
         };
+        graphData: {
+            labels: string[];
+            datasets: {
+                label: string;
+                data: number[];
+                backgroundColor: string[];
+                hoverOffset: number;
+            }[];
+        };
     }>
 }) {
 
     const statement = useAppSelector(s => s.operationSlice.statetement);
+    const graphData = useAppSelector(s => s.operationSlice.graphData);
+
     const dispatch = useDispatch<AppDispatch>()
 
     useEffect(() => {
-        dispatch(getUserStatement({loadPageInfo}));
+        dispatch(getUserStatement({ loadPageInfo }));
     }, []);
 
     return <section className="min-[1100px]:w-[25%] bg-grey-bytebank-light mb-[2em] min-[1100px]:my-[2em] min-[1100px]:ml-[2ch] p-[1em] rounded-[.5em] text-black">
@@ -44,5 +59,15 @@ export default function Statement({ loadPageInfo }: {
             </section>
             ))}
         </ul>
+        { graphData && 
+            <section className="py-[1em]">
+                <PieChart
+                    data={graphData}                    
+                />
+
+                <span className="text-center mt-[1em] block text-[.8em]">Baseado nas últimas {transactionsPerPage * 3} transações</span>
+
+            </section>
+        }
     </section>
 }

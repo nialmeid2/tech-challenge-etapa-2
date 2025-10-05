@@ -2,41 +2,31 @@
 
 
 
-import ButtonSecondary from "@repo/ui/components/ButtonSecondary/index";
 import ButtonTertiary from "@repo/ui/components/ButtonTertiary/index";
 import Input from "@repo/ui/components/Input/index";
 import Select from "@repo/ui/components/Select/index";
-import { getTransactionOptions, SubtractiveTransactions, transactionsPerPage, TransactionTypes } from "@repo/ui/model/enums/Transaction";
+import { getTransactionOptions, SubtractiveTransactions, TransactionTypes } from "@repo/ui/model/enums/Transaction";
 import { Transaction } from "@repo/ui/model/Transaction";
 import { toMoney } from "@repo/ui/model/utils/str.ts";
 import { AppDispatch, useAppSelector } from "@repo/ui/store/store";
 import { addFilters, loadNextPage, removeTransactionById } from "@repo/ui/store/reducers/OperationsReducer"
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import ButtonPrimary from "@repo/ui/components/ButtonPrimary/index";
+import { LoadedPageInfo } from "@repo/ui/serverActions/index";
 
 
 
 export default function TransactionsPage({ filterTransactions, removeTransaction, loadPageInfo }: {
     filterTransactions: (userId: number, date: Date | undefined, transactionType: TransactionTypes | undefined, page: number) => Promise<Transaction[]>,
     removeTransaction: (transactionId: number) => Promise<string>,
-    loadPageInfo: () => Promise<{
-        statement: Transaction[];
-        loggedUser: {
-            password: string;
-            id: number;
-            name: string;
-            email: string;
-            balance: number;
-            createdAt: Date;
-        };
-    }>
+    loadPageInfo: () => LoadedPageInfo
 }) {
 
     const dateRef = useRef<HTMLInputElement>(null);
     const typeRef = useRef<HTMLSelectElement>(null);
-
+    
     const user = useAppSelector(s => s.operationSlice.sessionUser);
     const transactions = useAppSelector(s => s.operationSlice.transactions);
     const lastFilters = useAppSelector(s => s.operationSlice.filterOptions.lastFilters);
@@ -44,7 +34,7 @@ export default function TransactionsPage({ filterTransactions, removeTransaction
     const alreadyEnded = useAppSelector(s => s.operationSlice.filterOptions.alreadyEnded);
     const errList = useAppSelector(s => s.operationSlice.errList);
 
-
+    const [fullImg, setFullImg] = useState<Record<number, boolean>>({});
 
 
     const dispatch = useDispatch<AppDispatch>();
@@ -57,24 +47,40 @@ export default function TransactionsPage({ filterTransactions, removeTransaction
 
         if (!theDate && !theType) return;
 
-        dispatch(addFilters({filterTransactions, lastFilters: { date: theDate, type: theType as TransactionTypes | undefined }, user: {...user, createdAt: new Date(user.createdAt)}}))
+        dispatch(addFilters({ filterTransactions, lastFilters: { date: theDate, type: theType as TransactionTypes | undefined }, user: { ...user, createdAt: new Date(user.createdAt) } }))
     }
 
     function callNextPage() {
 
-        const theUser = {...user, createdAt: new Date(user.createdAt)}
+        const theUser = { ...user, createdAt: new Date(user.createdAt) }
+        const theFilters = { ...lastFilters, date: lastFilters.date ? new Date(lastFilters.date) : undefined }
 
-        dispatch(loadNextPage({ currPage, lastFilters, user: theUser, filterTransactions }));
+        dispatch(loadNextPage({ currPage, lastFilters: theFilters, user: theUser, filterTransactions }));
 
-        
+
     }
 
     function removeTheTransaction(removeId: number) {
 
-        dispatch(removeTransactionById({id: removeId, removeTransaction, loadPageInfo}));
+        dispatch(removeTransactionById({ id: removeId, removeTransaction, loadPageInfo }));
 
 
     }
+
+    useEffect(() => {
+        if (!transactions)        
+            return;
+
+        const newFullImgs: Record<number, boolean> = {}; 
+        const transactionsWithAttachment = transactions.filter((t) => !!t.attachment)
+
+        for (let i = 0; i < transactionsWithAttachment.length; i++) {
+            newFullImgs[transactionsWithAttachment[i].id] = false;
+        }
+
+        setFullImg(newFullImgs);
+
+    }, [transactions])
 
     return <section className="flex flex-col">
         <form onSubmit={(e) => submitFilter(e)}>
@@ -102,6 +108,9 @@ export default function TransactionsPage({ filterTransactions, removeTransaction
                     <div className="text-green-bytebank-dark">{t.type}</div>
                     <div className="font-bold">{SubtractiveTransactions.includes(t.type as TransactionTypes) ? '-' : ''}{toMoney(t.value)}</div>
                     <div>{new Date(t.createdAt).toLocaleString(['pt-br', 'en-us'], { dateStyle: 'short', timeStyle: 'medium' })}</div>
+                    {t.attachment ? <img src={t.attachment} alt="comprovante da transação" 
+                        className={`${!fullImg[t.id] ? 'w-[10ch] transition-all duration-300' : 'w-[100%] transition-all duration-300'}`} 
+                        onClick={() => setFullImg((fi) => ({...fi, [t.id]: !fi[t.id]}))}/> : <></>}
                     {errList[t.id] ? <div className="text-red-bytebank-dark font-bold">{errList[t.id]}</div> : <></>}
                 </section>
                 <section>

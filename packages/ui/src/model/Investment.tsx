@@ -1,8 +1,14 @@
 import db from "../db/db";
 import { InvestmentTransactions, TransactionTypes } from "./enums/Transaction";
-import { Transaction } from "./Transaction";
 
 
+export const InvestmentTypes = [
+    TransactionTypes.INVESTIMENT_FUNDS,
+    TransactionTypes.DIRECT_TREASURY,
+    TransactionTypes.PRIVATE_RETIREMENT,
+    TransactionTypes.STOCKS,
+    TransactionTypes.INTEREST 
+]
 
 export async function getInvestmentsSummary(userId: number) {
     "use server"
