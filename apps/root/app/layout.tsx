@@ -1,12 +1,9 @@
+"use client"
 
 import { redirect } from "next/navigation";
 
 
-export default async function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default function RootLayout() {
     
     redirect('/home');
 }

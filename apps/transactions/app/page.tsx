@@ -1,7 +1,7 @@
 
 import StoreAppWrapper from "@/src/StoreAppWrapper";
 import { TransactionTypes } from "@repo/ui/model/enums/Transaction";
-import { addAdditiveOperation, addSubtractiveOperation, getFilteredTransactions, removeATransaction, Transaction } from "@repo/ui/model/Transaction";
+import { addAdditiveOperation, addSubtractiveOperation, editATransaction, getFilteredTransactions, removeATransaction, Transaction } from "@repo/ui/model/Transaction";
 import { User } from "@repo/ui/model/User";
 import { clearLoggedUser, getLoggedUser, loadPageInfo } from "@repo/ui/serverActions/index";
 import { redirect, RedirectType } from "next/navigation";
@@ -18,6 +18,12 @@ export default async function TransactionsRoute() {
         "use server"
         return await removeATransaction(transactionId) as string;
     }
+
+    async function editTheTransaction(transactionId: number, value: number) {
+        "use server"
+
+        return await editATransaction(transactionId, value) as string;
+    }
     
     const cachedUser = await getLoggedUser();
     
@@ -25,5 +31,5 @@ export default async function TransactionsRoute() {
         redirect('/', RedirectType.replace)
 
     return <StoreAppWrapper clearLoggedUser={clearLoggedUser} filterTransactions={filterTransactions} removeTransaction={removeTransaction}
-                loadPageInfo={loadPageInfo} />
+                loadPageInfo={loadPageInfo} editTheTransaction={editTheTransaction} />
 }

@@ -7,13 +7,12 @@ import ButtonSecondary from "@repo/ui/components/ButtonSecondary"
 import Container from "@repo/ui/components/Container"
 import LoadingScreen from "@repo/ui/components/LoadingScreen"
 import { User } from "@repo/ui/model/User"
-import { redirect, RedirectType, useRouter } from "next/navigation"
 import { FormEvent, useEffect, useRef, useState } from "react"
 import HomeHeader from "./Header"
 import HomeFooter from "./Footer"
 import { isPassSecure } from "@repo/ui/model/utils/str"
 import { addLoginErrMessage, createNewUser, resetLoginErrMessages, attemptLogin } from "@repo/ui/store/reducers/LoginReducer"
-import { useAppSelector } from "@repo/ui/store/store"
+import { AppDispatch, useAppSelector } from "@repo/ui/store/store"
 import { useDispatch } from "react-redux"
 
 export default function App({ doLogin, doSignUp, checkEmail }: {
@@ -30,8 +29,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
     const loggedUser = useAppSelector((s) => s.loginSlice.loggedUser);
     const errField = useAppSelector((s) => s.loginSlice.errField);
     const errMsg = useAppSelector((s) => s.loginSlice.errMsg);
-    const dispatch = useDispatch();
-    const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
 
     const nameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
@@ -84,7 +82,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
 
 
 
-        dispatch(createNewUser({ newUser, checkEmail, doSignUp }) as any);
+        dispatch(createNewUser({ newUser, checkEmail, doSignUp }));
 
 
     }
@@ -116,7 +114,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
         if (!isValid)
             return;
 
-        dispatch(attemptLogin({ email: loginInfo.email!, pass: loginInfo.pass!, doLogin }) as any);
+        dispatch(attemptLogin({ email: loginInfo.email!, pass: loginInfo.pass!, doLogin }));
 
 
     }

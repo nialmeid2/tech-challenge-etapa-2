@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import TailwindWrapper from "@repo/ui/TailwindWrapper";
 
-
 const inter = Inter({
     subsets: ["latin"],
 });
@@ -23,7 +22,7 @@ export default async function RootLayout({
     
 
     return (
-        <html lang="en">
+        <html lang="pt">
             <TailwindWrapper />
             <body
                 className={`${inter.className} bg-[#333] text-white antialiased min-w-screen min-h-screen overflow-x-hidden flex`}

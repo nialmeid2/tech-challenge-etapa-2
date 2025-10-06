@@ -1,6 +1,20 @@
+"use client"
 
+import { useEffect, useState } from "react"
 
 export default function TailwindWrapper() {
+
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+    if (!isClient)
+        return <head>
+            <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>            
+        </head>
+
     // This will cause a hydration error, but some styles will only be properly rendered if the client has to fetch some extra styles. 
     // Fully hydrated server side style won`t render properly
     return <head>

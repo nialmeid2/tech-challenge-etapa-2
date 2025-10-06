@@ -262,3 +262,71 @@ export async function removeATransaction(transactionId: number) {
     }
 
 }
+
+
+export async function editATransaction(id: number, value: number) {
+    "use server"
+
+    try {
+
+        const prevTransaction = await db.transaction.findFirst({
+            where: { id }
+        });
+
+        if (!prevTransaction) { await db.$disconnect(); return 'Transação não existente'; }
+
+        const theUser = await db.user.findUnique({
+            where: { id: prevTransaction.userId }
+        })
+
+        if (!theUser) { await db.$disconnect(); return 'Usuário não existente' }
+
+        if (AdditiveTransactions.includes(prevTransaction.type as TransactionTypes)) {
+
+            const difference = prevTransaction.value - value;
+
+            const newBalance = theUser.balance - difference; // 3500 to a 3000 additive transaction results in a 500 gain
+
+            if (newBalance < 0) {
+                await db.$disconnect();
+                return `A edição está inválida por um total de ${Math.abs(newBalance)}. O saldo resultante não deve ficar menor que 0`;
+            }
+
+            await db.user.update({
+                where: { id: prevTransaction.userId },
+                data: { balance: newBalance }
+            })
+
+        } else if (SubtractiveTransactions.includes(prevTransaction.type as TransactionTypes)) {
+
+            const difference = prevTransaction.value - value;
+            const newBalance = theUser.balance + difference; // 2500 to a 3000 subtractive transaction will result in a 500 gain
+
+            if (newBalance < 0) {
+                await db.$disconnect();
+                return `A edição está inválida por um total de ${Math.abs(newBalance)}. O saldo resultante não deve ficar menor que 0`;
+            }
+
+            await db.user.update({
+                where: { id: prevTransaction.userId },
+                data: { balance: newBalance }
+            })
+
+        } else {
+            await db.$disconnect();
+            return 'Transação Inválida'
+        }
+
+        await db.transaction.update({
+            where: { id },
+            data: { value }
+        })
+
+        await db.$disconnect();
+        return '';
+    } catch (err) {
+        console.log(err);
+        throw err;
+    }
+
+}

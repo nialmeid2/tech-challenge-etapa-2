@@ -2,7 +2,7 @@
 
 import { createAsyncThunk, createSlice, isAnyOf, WritableDraft } from "@reduxjs/toolkit";
 import { User } from "../../model/User";
-import { createOperation, loadNextPage, getUserStatement, removeTransactionById, addFilters } from "./OperationsReducer";
+import { createOperation, loadNextPage, getUserStatement, removeTransactionById, addFilters, editTransaction } from "./OperationsReducer";
 import { loadUserInvestments } from "./InvestmentsReducer";
 import { updateAccountInfo } from "./AccountReducer";
 
@@ -47,7 +47,7 @@ const loginSlice = createSlice({
         },
         addLoginErrMessage: (state, action: { payload: { field: PossibleFields, msg: string } }) => {
             addErrMessageInternally(state, action.payload.field, action.payload.msg);
-        },    
+        },
     },
     extraReducers: (builder) => {
 
@@ -94,14 +94,16 @@ const loginSlice = createSlice({
                 state.loggedUser = {} as SerializableUser
             })
             .addMatcher(isAnyOf(attemptLogin.pending, createNewUser.pending, logoutUser.pending, getUserStatement.pending, createOperation.pending,
-                loadNextPage.pending, removeTransactionById.pending, addFilters.pending, loadUserInvestments.pending, updateAccountInfo.pending
+                loadNextPage.pending, removeTransactionById.pending, addFilters.pending, loadUserInvestments.pending, updateAccountInfo.pending, editTransaction.pending
             ), (state) => {
                 state.isLoading = true;
             })
-            .addMatcher(isAnyOf(attemptLogin.fulfilled, createNewUser.fulfilled, logoutUser.fulfilled, getUserStatement.fulfilled, createOperation.fulfilled, 
+            .addMatcher(isAnyOf(attemptLogin.fulfilled, createNewUser.fulfilled, logoutUser.fulfilled, getUserStatement.fulfilled, createOperation.fulfilled,
                 loadNextPage.fulfilled, removeTransactionById.fulfilled, addFilters.fulfilled, loadUserInvestments.fulfilled, updateAccountInfo.fulfilled,
-                attemptLogin.rejected, createNewUser.rejected, logoutUser.rejected, getUserStatement.rejected, createOperation.rejected, 
-                loadNextPage.rejected, removeTransactionById.rejected, addFilters.rejected, loadUserInvestments.rejected, updateAccountInfo.rejected),
+                editTransaction.fulfilled,
+                attemptLogin.rejected, createNewUser.rejected, logoutUser.rejected, getUserStatement.rejected, createOperation.rejected,
+                loadNextPage.rejected, removeTransactionById.rejected, addFilters.rejected, loadUserInvestments.rejected, updateAccountInfo.rejected,
+                editTransaction.rejected),
                 (state) => {
                     state.isLoading = false;
                 })
@@ -161,7 +163,7 @@ export const createNewUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk(
     "user/logout",
-    async (payload: {clearLoggedUser: () => Promise<void>}) => {
+    async (payload: { clearLoggedUser: () => Promise<void> }) => {
         await payload.clearLoggedUser();
     }
 )

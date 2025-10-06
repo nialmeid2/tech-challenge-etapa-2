@@ -8,21 +8,12 @@ import Statement from "@repo/ui/components/Statement/index";
 import Summary from "@repo/ui/components/Summary/index";
 import { Transaction } from "@repo/ui/model/Transaction"
 import { ReactNode } from "react";
+import { LoadedPageInfo } from "../../serverActions";
 
 
 export default function Dashboard({ clearLoggedUser, loadPageInfo, children }: {
     clearLoggedUser: () => Promise<void>,
-    loadPageInfo: () => Promise<{
-        statement: Transaction[];
-        loggedUser: {
-            password: string;
-            id: number;
-            name: string;
-            email: string;
-            balance: number;
-            createdAt: Date;
-        };
-    }>,
+    loadPageInfo: () => LoadedPageInfo,
     children: ReactNode
 }) {
 

@@ -1,21 +1,25 @@
 "use client"
 
-
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { logoutUser } from "../../store/reducers/LoginReducer";
 import { AppDispatch, useAppSelector } from "../../store/store";
 import { closeMenu } from "../../store/reducers/OperationsReducer";
+import { useEffect, useState } from "react";
 
 
 export default function MenuDashboard({clearLoggedUser} : {
     clearLoggedUser: () => Promise<void>        
 }) {
 
-    const pathName = usePathname();
+    const [pathName, setPathName] = useState('');
     const isMenuOpen = useAppSelector(s => s.operationSlice.isMenuOpen)
     const dispatch = useDispatch<AppDispatch>();
+
+    useEffect(() => {
+        setPathName(location.pathname);
+    }, [])
+    
     
     const linkStyle = (active: boolean) => `py-[1em] w-[100%] text-center block ${active ? 
             'max-[550px]:text-red-bytebank-dark text-green-bytebank border-green-bytebank font-bold border-b-[.2em]' : 

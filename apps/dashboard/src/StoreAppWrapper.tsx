@@ -7,6 +7,8 @@ import { Transaction } from "@repo/ui/model/Transaction";
 import Dashboard from "@repo/ui/components/Dashboard/index";
 import OperationsPage from "./OperationsPage";
 import { LoadedPageInfo } from "@repo/ui/serverActions/index";
+
+
 export default function StoreAppWrapper({ createAdditiveOperation, createSubtractiveOperation, clearLoggedUser, loadPageInfo }: {
     createAdditiveOperation: (user: User, transaction: Omit<Transaction, "id">) => Promise<void>,
     createSubtractiveOperation: (user: User, transaction: Omit<Transaction, "id">) => Promise<void>,

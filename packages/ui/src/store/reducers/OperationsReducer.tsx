@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, isAnyOf, WritableDraft } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, isAnyOf, PayloadAction, WritableDraft } from "@reduxjs/toolkit";
 import { Transaction } from "../../model/Transaction";
 import { SerializableUser } from "./LoginReducer";
 import { User } from "../../model/User";
@@ -15,6 +15,7 @@ export interface OperationsState {
     isMenuOpen: boolean,
     transactions: SerializableTransaction[],
     sessionUser: SerializableUser,
+    attachment: string | ArrayBuffer | null | undefined,
     filterOptions: {
         alreadyEnded: boolean,
         currPage: number,
@@ -48,11 +49,33 @@ function addNewErrField(state: WritableDraft<OperationsState>, field: PossibleFi
     state.errFields[field] = value;
 }
 
+function removeOrEditFulfilled(state: WritableDraft<OperationsState>, payload: ErrorStmt | SerializableInfoWithId) {
+
+    const stmt = payload;
+
+    if ((stmt as ErrorStmt)?.msg) {
+        const newErrList = {} as Record<number, string>;
+        const err = stmt as ErrorStmt;
+        newErrList[err.id] = err.msg;
+        state.errList = newErrList;
+        return false;
+    }
+
+    state.errList = {};
+    state.errFields = defaultFields()
+    state.statetement = (payload as SerializableInfoWithId).statement;
+    state.sessionUser = (payload as SerializableInfoWithId).loggedUser;
+    state.graphData = (payload as SerializableInfoWithId).graphData
+    return true;
+
+}
+
 const operationSlice = createSlice({
     name: 'operations',
     initialState: {
         statetement: [],
         transactions: [],
+        attachment: undefined,
         isMenuOpen: false,
         sessionUser: {} as SerializableUser,
         filterOptions: {
@@ -76,6 +99,9 @@ const operationSlice = createSlice({
             state.errFields = defaultFields();
             state.errList = {};
         },
+        saveAttachment: (state, action: { payload: string | ArrayBuffer | null | undefined }) => {
+            state.attachment = action.payload;
+        },
         addErrField: (state, action: { payload: { field: PossibleFields, value: string } }) => {
             addNewErrField(state, action.payload.field, action.payload.value);
         }
@@ -91,22 +117,15 @@ const operationSlice = createSlice({
                 state.filterOptions.currPage += 1;
             })
             .addCase(removeTransactionById.fulfilled, (state, action) => {
-                const stmt = action.payload;
+                if (removeOrEditFulfilled(state, action.payload))
+                    state.transactions = state.transactions.filter((tobj) => tobj.id != action.payload.id)
 
-                if ((stmt as ErrorStmt)?.msg) {
-                    const newErrList = {} as Record<number, string>;
-                    const err = stmt as ErrorStmt;
-                    newErrList[err.id] = err.msg;
-                    state.errList = newErrList;
-                    return;
+            })
+            .addCase(editTransaction.fulfilled, (state, action) => {
+                if (removeOrEditFulfilled(state, action.payload)) {
+                    const theIndex = state.transactions.findIndex((t) => t.id == action.payload.id);
+                    state.transactions[theIndex]!.value = (action.payload as SerializableInfoWithIdAndValue).value
                 }
-
-                state.errList = {};
-                state.errFields = defaultFields()
-                state.statetement = (action.payload as SerializableInfoWithId).statement;
-                state.sessionUser = (action.payload as SerializableInfoWithId).loggedUser;
-                state.graphData = (action.payload as SerializableInfoWithId).graphData
-                state.transactions = state.transactions.filter((tobj) => tobj.id != action.payload.id)
             })
             .addCase(addFilters.pending, (state) => {
                 state.filterOptions.lastFilters = { date: undefined, type: undefined }
@@ -131,7 +150,7 @@ const operationSlice = createSlice({
             })
             .addCase(createOperation.pending, (state) => {
                 state.errFields = defaultFields();
-                state.errList = {};                
+                state.errList = {};
             })
             .addMatcher(isAnyOf(getUserStatement.fulfilled, createOperation.fulfilled),
                 (state, action) => {
@@ -140,7 +159,7 @@ const operationSlice = createSlice({
                     state.graphData = action.payload.graphData;
                 })
             .addMatcher(isAnyOf(getUserStatement.rejected, createOperation.rejected, loadNextPage.rejected, removeTransactionById.rejected,
-                addFilters.rejected),
+                addFilters.rejected, editTransaction.rejected),
                 (state, action) => {
                     console.error(action.error);
                 })
@@ -211,6 +230,30 @@ export const removeTransactionById = createAsyncThunk(
     }
 )
 
+export const editTransaction = createAsyncThunk(
+    "operations/editTransaction",
+    async (payload: {
+        transactionId: number,
+        transactionValue: number,
+        editTheTransaction: (transactionId: number, transactionValue: number) => Promise<string>,
+        loadPageInfo: () => LoadedPageInfo
+    }) => {
+
+        const { transactionId, transactionValue } = payload;
+
+        const stmt = await payload.editTheTransaction(transactionId, transactionValue);
+
+        if (stmt)
+            return { msg: stmt, id: transactionId } as ErrorStmt;
+
+        const pageInfo = await payload.loadPageInfo();
+
+
+
+        return { ...getSerializablePageInfo(pageInfo), id: transactionId, value: transactionValue } as SerializableInfoWithIdAndValue;
+    }
+)
+
 export const addFilters = createAsyncThunk(
     "operations/newFilters",
     async (payload: {
@@ -229,8 +272,14 @@ export const addFilters = createAsyncThunk(
     }
 )
 
+
+
 interface SerializableInfoWithId extends SerializablePageInfo {
     id: number
+}
+
+interface SerializableInfoWithIdAndValue extends SerializableInfoWithId {
+    value: number
 }
 
 interface ErrorStmt {
@@ -266,7 +315,7 @@ export interface SerializablePageInfo {
 }
 
 
-export const { toggleMenu, closeMenu, addErrField } = operationSlice.actions
+export const { toggleMenu, closeMenu, addErrField, saveAttachment } = operationSlice.actions
 
 const operationsReducer = operationSlice.reducer;
 export default operationsReducer;
