@@ -28,7 +28,7 @@ export async function getInvestmentsSummary(userId: number) {
             [TransactionTypes.INTEREST]: defaultReportLine()
         }
 
-        for (let iType in investments) {
+        for (const iType in investments) {
 
             const totalForInvestment = await db.transaction.aggregate({
                 where: { type: iType, userId: userId },

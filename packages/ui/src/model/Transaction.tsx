@@ -79,7 +79,7 @@ export async function getGraphData(userId: number, maximumOperations = transacti
         ]
 
 
-        for (let opType in operationTypes) {
+        for (const opType in operationTypes) {
 
             const theArray = operationTypes[opType]!;
 

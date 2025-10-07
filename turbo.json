@@ -1,21 +1,44 @@
 {
-  "$schema": "https://turborepo.com/schema.json",
-  "ui": "tui",
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
+    "$schema": "https://turborepo.com/schema.json",
+    "ui": "tui",
+    "globalEnv": [
+        "DATABASE_URL",
+        "SALT_ROUNDS"
+    ],
+    "tasks": {
+        "build": {
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "$TURBO_DEFAULT$",
+                ".env*"
+            ],
+            "outputs": [
+                ".next/**",
+                "!.next/cache/**"
+            ],
+            "env": [
+                "landing_page_url",
+                "dashboard_page_url",
+                "transactions_page_url",
+                "investments_page_url",
+                "account_page_url"
+            ]
+        },
+        "lint": {
+            "dependsOn": [
+                "^lint"
+            ]
+        },
+        "check-types": {
+            "dependsOn": [
+                "^check-types"
+            ]
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true
+        }
     }
-  }
 }

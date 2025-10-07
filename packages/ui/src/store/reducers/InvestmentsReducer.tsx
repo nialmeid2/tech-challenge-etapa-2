@@ -67,7 +67,7 @@ const invesmentsSlice = createSlice({
 
                 console.log(result);
 
-                for (let iType in result) {
+                for (const iType in result) {
                     const investmentTotal = result[iType as InvestmentTransactions].total
                     theTotal += investmentTotal;
                     allInvestments[iType as InvestmentTransactions] = result[iType as InvestmentTransactions];

@@ -1,13 +1,13 @@
 "use client"
 
-import { useSelector } from "react-redux"
+import { useContext } from "react";
 import { useAppSelector } from "../../store/store"
 
 
 export default function LoadingScreen() {
 
-    const isLoading = useAppSelector(state => state.loginSlice.isLoading);
-
+    const isLoading = useAppSelector(state => state.loginSlice.isLoading);    
+    
     
 
     return <aside className={`z-[1001] flex items-center justify-center ${isLoading ? 'bg-white/25 fixed left-[0] top-[0] h-[100vh] w-[100vw]' : 'hidden'}`}>

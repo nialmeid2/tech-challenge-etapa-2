@@ -1,9 +1,35 @@
-"use client"
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
-import { redirect } from "next/navigation";
 
 
-export default function RootLayout() {
+
+const inter = Inter({
+    subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+    title: "Byte Bank",
+    description: "Experimente mais liberdade no controle da sua vida financeira",
+    icons: '/logo.svg'
+};
+
+
+export default async function RootLayout({
+    children,
+}: Readonly<{
+    children: React.ReactNode;
+}>) {
+
     
-    redirect('/home');
+
+    return (
+        <html lang="pt">
+            <body
+                className={`${inter.className} antialiased min-w-screen min-h-screen overflow-x-hidden flex`}
+            >
+                {children}
+            </body>
+        </html>
+    );
 }

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+    
+
     output: "standalone",
     /* config options here */
     async rewrites() {
@@ -8,72 +10,72 @@ const nextConfig: NextConfig = {
             // landing-page
             {
                 source: '/home',
-                destination: `http://localhost:3001/`,
+                destination: `${process.env['landing_page_url']}`,
             },
             {
                 source: '/home/:path+',
-                destination: `http://localhost:3001/:path+`,
+                destination: `${process.env['landing_page_url']}:path+`,
             },
             {
                 source: '/home-static/:path+',
-                destination: `http://localhost:3001/home-static/:path+`,
+                destination: `${process.env['landing_page_url']}home-static/:path+`,
             },
 
             // dashboard
             {
                 source: '/dashboard',
-                destination: `http://localhost:3002/`,
+                destination: `${process.env['dashboard_page_url']}`,
             },
             {
                 source: '/dashboard/:path+',
-                destination: `http://localhost:3002/:path+`,
+                destination: `${process.env['dashboard_page_url']}:path+`,
             },
             {
                 source: '/dashboard-static/:path+',
-                destination: `http://localhost:3002/dashboard-static/:path+`
+                destination: `${process.env['dashboard_page_url']}dashboard-static/:path+`
             },
 
             // transactions
             {
                 source: '/transactions',
-                destination: `http://localhost:3003/`,
+                destination: `${process.env['transactions_page_url']}`,
             },
             {
                 source: '/transactions/:path+',
-                destination: `http://localhost:3003/:path+`,
+                destination: `${process.env['transactions_page_url']}:path+`,
             },
             {
                 source: '/transactions-static/:path+',
-                destination: `http://localhost:3003/transactions-static/:path+`
+                destination: `${process.env['transactions_page_url']}transactions-static/:path+`
             },
 
             // investments
             {
                 source: '/investments',
-                destination: `http://localhost:3004/`,
+                destination: `${process.env['investments_page_url']}`,
             },
             {
                 source: '/investments/:path+',
-                destination: `http://localhost:3004/:path+`,
+                destination: `${process.env['investments_page_url']}:path+`,
             },
             {
                 source: '/investments-static/:path+',
-                destination: `http://localhost:3004/investments-static/:path+`
+                destination: `${process.env['investments_page_url']}investments-static/:path+`
             },
 
 
             // account
             {
                 source: '/account',
-                destination: `http://localhost:3005/`,
+                destination: `${process.env['account_page_url']}`,
             },
             {
                 source: '/account/:path+',
-                destination: `http://localhost:3005/:path+`,
+                destination: `${process.env['account_page_url']}:path+`,
             },
             {
                 source: '/account-static/:path+',
-                destination: `http://localhost:3005/account-static/:path+`
+                destination: `${process.env['account_page_url']}account-static/:path+`
             },
         ];
     }
