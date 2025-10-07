@@ -1,16 +1,11 @@
-"use client"
+import { DetailedHTMLProps, HTMLAttributes } from "react";
 
-import { DetailedHTMLProps, HTMLAttributes, useContext } from "react";
-
-interface Props extends DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
+interface Props extends HTMLAttributes<HTMLDivElement> {
     containerSizeClass?: string
 }
 
 export default function Container({containerSizeClass = 'max-w-[75em]', className = '', children, ...rest} : Props) {
-
-    
-
-    return <div {...rest} className={`${containerSizeClass} w-[95%] flex justify-between mx-auto ${className}`} >
+    return <div className={`${containerSizeClass} w-[95%] flex justify-between mx-auto ${className}`} {...rest}>
         {children}        
     </div>
 }

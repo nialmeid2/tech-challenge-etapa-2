@@ -1,7 +1,8 @@
 import { DetailedHTMLProps, SelectHTMLAttributes } from "react";
 
-interface Props extends DetailedHTMLProps<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement> {
-    hasError?: boolean
+interface Props extends SelectHTMLAttributes<HTMLSelectElement> {
+    hasError?: boolean,
+    ref: any
 }
 
 export default function Select({className = '', children, hasError, ...rest} : Props) {

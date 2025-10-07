@@ -49,7 +49,7 @@ export default function MenuDashboard({clearLoggedUser} : {
                     <a href="/account" className={linkStyle(pathName?.toLowerCase() == '/account')}>Outros Serviços</a>
                 </li>
                 <li className="min-[550px]:hidden min-[1100px]:block">
-                    <a href="/" onClick={() => dispatch(logoutUser({clearLoggedUser}))} className={linkStyle(false)}>Encerrar Sessão</a>
+                    <a href="/home" onClick={() => dispatch(logoutUser({clearLoggedUser}))} className={linkStyle(false)}>Encerrar Sessão</a>
                 </li>
             </ul>
         </nav>

@@ -1,6 +1,8 @@
 "use client"
 
+import ButtonPrimary from "@repo/ui/components/ButtonPrimary/index";
 import ButtonSecondary from "@repo/ui/components/ButtonSecondary/index";
+import ButtonTertiary from "@repo/ui/components/ButtonTertiary/index";
 import Input from "@repo/ui/components/Input/index";
 import { isPassSecure } from "@repo/ui/model/utils/str.ts";
 import { resetAccountErrFields, setAccountErrField, updateAccountInfo } from "@repo/ui/store/reducers/AccountReducer";
@@ -96,9 +98,9 @@ export default function AccountPage({ updateUserInfo }: {
 
             {successMsg && <div className="text-green-bytebank-dark font-bold my-[1em]">{successMsg}</div>}
 
-            <ButtonSecondary className="mt-[1em]" type="submit">
+            <ButtonTertiary className="mt-[1em]" type="submit">
                 Salvar Alterações
-            </ButtonSecondary>
+            </ButtonTertiary>
 
             <img src="/Adjustments.svg" alt="Ajustes" className="w-[100%] mt-[1em] min-[851px]:hidden" />
         </form>

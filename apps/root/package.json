@@ -4,48 +4,25 @@
     "private": true,
     "scripts": {
         "dev": "next dev --turbopack",
-<<<<<<< HEAD
-        "build": "next build --turbopack --no-lint",
-=======
         "build": "cross-env NODE_ENV=production next build",
->>>>>>> 9ca4f8aa147c7eb0fbce80f306ba5f8786f0124d
         "start": "next start",
         "lint": "eslint"
     },
     "dependencies": {
-<<<<<<< HEAD
-        "@reduxjs/toolkit": "^2.9.0",
-        "@repo/ui": "^1.0.0",
-        "react": "19.1.0",
-        "react-dom": "19.1.0",
-        "next": "15.5.3",
-        "react-redux": "^9.2.0"
-    },
-    "devDependencies": {
-        "@eslint/eslintrc": "^3",
-=======
         "next": "15.5.4",
         "react": "19.1.0",
         "react-dom": "19.1.0"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3",                        
->>>>>>> 9ca4f8aa147c7eb0fbce80f306ba5f8786f0124d
         "@tailwindcss/postcss": "^4",
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
-<<<<<<< HEAD
-=======
         "cross-env": "^10.1.0",
->>>>>>> 9ca4f8aa147c7eb0fbce80f306ba5f8786f0124d
         "eslint": "^9",
         "eslint-config-next": "15.5.3",
         "tailwindcss": "^4",
         "typescript": "^5"
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 9ca4f8aa147c7eb0fbce80f306ba5f8786f0124d

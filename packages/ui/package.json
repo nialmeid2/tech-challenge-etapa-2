@@ -1,6 +1,6 @@
 {
   "name": "@repo/ui",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "exports": {
     "./*": "./src/*.tsx",
@@ -9,7 +9,7 @@
     "./*.js": "./src/*.js"
   },
   "scripts": {
-    "lint": "eslint . --max-warnings 5000",
+    "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit"
   },
@@ -28,11 +28,11 @@
     "@reduxjs/toolkit": "^2.9.0",
     "bcrypt": "^6.0.0",
     "chart.js": "^4.5.0",
+    "next": "15.5.4",
     "prisma": "^6.13.0",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.0",
-    "react-redux": "^9.2.0",
-    "next": "15.5.3"
-  }    
+    "react-redux": "^9.2.0"
+  }
 }

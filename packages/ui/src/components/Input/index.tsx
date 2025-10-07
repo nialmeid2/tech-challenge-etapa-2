@@ -1,7 +1,8 @@
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
 
-interface Props extends DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
-    hasError?: boolean
+interface Props extends InputHTMLAttributes<HTMLInputElement> {
+    hasError?: boolean,
+    ref: any
 }
 
 
