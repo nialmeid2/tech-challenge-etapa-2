@@ -6,7 +6,6 @@ import LoadingScreen from "@repo/ui/components/LoadingScreen/index";
 import MenuDashboard from "@repo/ui/components/MenuDashboard/index";
 import Statement from "@repo/ui/components/Statement/index";
 import Summary from "@repo/ui/components/Summary/index";
-import { Transaction } from "@repo/ui/model/Transaction"
 import { ReactNode } from "react";
 import { LoadedPageInfo } from "../../serverActions";
 

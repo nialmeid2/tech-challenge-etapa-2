@@ -3,16 +3,15 @@
 import ButtonSecondary from "@repo/ui/components/ButtonSecondary/index";
 import Input from "@repo/ui/components/Input/index";
 import { isPassSecure } from "@repo/ui/model/utils/str.ts";
-import { LoadedPageInfo } from "@repo/ui/serverActions/index";
 import { resetAccountErrFields, setAccountErrField, updateAccountInfo } from "@repo/ui/store/reducers/AccountReducer";
 import { AppDispatch, useAppSelector } from "@repo/ui/store/store";
 import { FormEvent, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 
-export default function AccountPage({ updateUserInfo, loadPageInfo }: {
+export default function AccountPage({ updateUserInfo }: {
     updateUserInfo: (id: number, name: string, pass: string) => Promise<void>,
-    loadPageInfo: () => LoadedPageInfo
+    
 }) {
 
     const nameRef = useRef<HTMLInputElement>(null);

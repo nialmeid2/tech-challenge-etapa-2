@@ -151,7 +151,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
                         <p>Experimente mais liberdade no controle da sua vida financeira.</p>
                         <p>Crie sua conta com a gente</p>
                     </blockquote>
-                    <img src="/home/graph_banner.svg" className="w-[50%] max-[850px]:w-[100%]" />
+                    <img alt="banner da bytebank" src="/home/graph_banner.svg" className="w-[50%] max-[850px]:w-[100%]" />
                     <section className="min-[672px]:hidden flex justify-between gap-[2ch]">
                         <ButtonPrimaryBlack onClick={() => setModalNewAccountVisible(true)}>Abrir minha conta</ButtonPrimaryBlack>
                         <ButtonPrimaryOutlinedBlack onClick={() => setModalLoginVisible(true)}>Já tenho conta</ButtonPrimaryOutlinedBlack>
@@ -163,22 +163,22 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
                     </section>
                     <section className="grid grid-cols-4 gap-[2em] mt-[1em] max-[850px]:grid-cols-2 max-[671px]:grid-cols-1">
                         <figure className="text-green-bytebank-dark  flex flex-col gap-[.25em]">
-                            <img src="/home/gift.svg" className="w-[4.5em] mx-auto" />
+                            <img alt="ícone de presente" src="/home/gift.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Conta e cartão corporativos</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Isso mesmo, nossa conta é digital, sem custo fixo e mais que isso: sem tarifa de manutenção.</p>
                         </figure>
                         <figure className="text-green-bytebank-dark flex flex-col gap-[.25em]">
-                            <img src="/home/withdraw.svg" className="w-[4.5em] mx-auto" />
+                            <img alt="ícone de saque" src="/home/withdraw.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Saque sem custo</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Você pade sacar gratuitamente 4x por mês de qualquer banco 24h.</p>
                         </figure>
                         <figure className="text-green-bytebank-dark flex flex-col gap-[.25em]">
-                            <img src="/home/star.svg" className="w-[4.5em] mx-auto" />
+                            <img alt="ícone de estrela" src="/home/star.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Programa de pontos</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Você pade acumular pontos com suas compras no crédito sem pagar mensalidade!</p>
                         </figure>
                         <figure className="text-green-bytebank-dark flex flex-col gap-[.25em]">
-                            <img src="/home/devices.svg" className="w-[4.5em] mx-auto" />
+                            <img alt="ícone de dispositivos" src="/home/devices.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Seguro dispositivos</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Seus dispositivos móveis (computador e laptop) protegidos por uma mensalidade simbólica.</p>
                         </figure>

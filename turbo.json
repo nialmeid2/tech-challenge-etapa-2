@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "$schema": "https://turborepo.com/schema.json",
     "ui": "tui",
     "globalEnv": [
@@ -40,5 +41,25 @@
             "cache": false,
             "persistent": true
         }
+=======
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "globalEnv": ["DATABASE_URL", "SALT_ROUNDS"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+>>>>>>> 9ca4f8aa147c7eb0fbce80f306ba5f8786f0124d
     }
 }
