@@ -7,14 +7,15 @@ import ButtonSecondary from "@repo/ui/components/ButtonSecondary"
 import Container from "@repo/ui/components/Container"
 import LoadingScreen from "@repo/ui/components/LoadingScreen"
 import { User } from "@repo/ui/model/User"
-import { redirect, RedirectType, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { FormEvent, useEffect, useRef, useState } from "react"
 import HomeHeader from "./Header"
 import HomeFooter from "./Footer"
 import { isPassSecure } from "@repo/ui/model/utils/str"
 import { addLoginErrMessage, createNewUser, resetLoginErrMessages, attemptLogin } from "@repo/ui/store/reducers/LoginReducer"
-import { useAppSelector } from "@repo/ui/store/store"
+import { AppDispatch, useAppSelector } from "@repo/ui/store/store"
 import { useDispatch } from "react-redux"
+import Image from "next/image"
 
 export default function App({ doLogin, doSignUp, checkEmail }: {
     doLogin: (email: string, password: string) => Promise<User | undefined>,
@@ -30,8 +31,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
     const loggedUser = useAppSelector((s) => s.loginSlice.loggedUser);
     const errField = useAppSelector((s) => s.loginSlice.errField);
     const errMsg = useAppSelector((s) => s.loginSlice.errMsg);
-    const dispatch = useDispatch();
-    const router = useRouter();
+    const dispatch = useDispatch<AppDispatch>();
 
     const nameRef = useRef<HTMLInputElement>(null);
     const emailRef = useRef<HTMLInputElement>(null);
@@ -84,7 +84,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
 
 
 
-        dispatch(createNewUser({ newUser, checkEmail, doSignUp }) as any);
+        dispatch(createNewUser({ newUser, checkEmail, doSignUp }));
 
 
     }
@@ -116,7 +116,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
         if (!isValid)
             return;
 
-        dispatch(attemptLogin({ email: loginInfo.email!, pass: loginInfo.pass!, doLogin }) as any);
+        dispatch(attemptLogin({ email: loginInfo.email!, pass: loginInfo.pass!, doLogin }));
 
 
     }
@@ -153,7 +153,7 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
                         <p>Experimente mais liberdade no controle da sua vida financeira.</p>
                         <p>Crie sua conta com a gente</p>
                     </blockquote>
-                    <img src="/home/graph_banner.svg" className="w-[50%] max-[850px]:w-[100%]" />
+                    <Image alt="banner da bytebank" src="/home/graph_banner.svg" className="w-[50%] max-[850px]:w-[100%]" />
                     <section className="min-[672px]:hidden flex justify-between gap-[2ch]">
                         <ButtonPrimaryBlack onClick={() => setModalNewAccountVisible(true)}>Abrir minha conta</ButtonPrimaryBlack>
                         <ButtonPrimaryOutlinedBlack onClick={() => setModalLoginVisible(true)}>Já tenho conta</ButtonPrimaryOutlinedBlack>
@@ -165,22 +165,22 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
                     </section>
                     <section className="grid grid-cols-4 gap-[2em] mt-[1em] max-[850px]:grid-cols-2 max-[671px]:grid-cols-1">
                         <figure className="text-green-bytebank-dark  flex flex-col gap-[.25em]">
-                            <img src="/home/gift.svg" className="w-[4.5em] mx-auto" />
+                            <Image alt="ícone de presente" src="/home/gift.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Conta e cartão corporativos</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Isso mesmo, nossa conta é digital, sem custo fixo e mais que isso: sem tarifa de manutenção.</p>
                         </figure>
                         <figure className="text-green-bytebank-dark flex flex-col gap-[.25em]">
-                            <img src="/home/withdraw.svg" className="w-[4.5em] mx-auto" />
+                            <Image alt="ícone de saque" src="/home/withdraw.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Saque sem custo</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Você pade sacar gratuitamente 4x por mês de qualquer banco 24h.</p>
                         </figure>
                         <figure className="text-green-bytebank-dark flex flex-col gap-[.25em]">
-                            <img src="/home/star.svg" className="w-[4.5em] mx-auto" />
+                            <Image alt="ícone de estrela" src="/home/star.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Programa de pontos</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Você pade acumular pontos com suas compras no crédito sem pagar mensalidade!</p>
                         </figure>
                         <figure className="text-green-bytebank-dark flex flex-col gap-[.25em]">
-                            <img src="/home/devices.svg" className="w-[4.5em] mx-auto" />
+                            <Image alt="ícone de dispositivos" src="/home/devices.svg" className="w-[4.5em] mx-auto" />
                             <figcaption className="text-center font-bold">Seguro dispositivos</figcaption>
                             <p className="text-center text-grey-bytebank-dark mt-[.5em]">Seus dispositivos móveis (computador e laptop) protegidos por uma mensalidade simbólica.</p>
                         </figure>
@@ -194,11 +194,11 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
 
         <aside className={`flex fixed translate-x-[-50%] left-[50%] top-[0] w-[49.5em] max-w-[90%] h-[100vh] z-[99] ${modalNewAccountVisible ? '' : 'hidden'} bg-[#f8f8f8]`}>
             <button className="absolute cursor-pointer top-[1em] right-[1em]" onClick={() => { setModalNewAccountVisible(false); emptyFields() }}>
-                <img src="/home/x.svg" alt="fechar" className="h-[1em]" />
+                <Image src="/home/x.svg" alt="fechar" className="h-[1em]" />
             </button>
 
             <form onSubmit={(e) => submitNewAccount(e)} className="flex flex-col p-[2em] py-[1em] w-[100%] max-[490px]:p-[1em]">
-                <img src="/home/girl_on_pc.svg" alt="Cadastro de usuário" className="h-[20em] mx-auto" />
+                <Image src="/home/girl_on_pc.svg" alt="Cadastro de usuário" className="h-[20em] mx-auto" />
                 <fieldset className="flex flex-col mx-[10%]">
                     <legend className="font-bold mb-[1em]">Preencha os campos abaixo para criar sua conta corrente!</legend>
                     <section className="flex flex-col gap-[.25em] mb-[1em]">
@@ -228,11 +228,11 @@ export default function App({ doLogin, doSignUp, checkEmail }: {
 
         <aside className={`flex fixed translate-x-[-50%] left-[50%] top-[0] w-[49.5em] max-w-[90%] h-[100vh] z-[99] ${modalLoginVisible ? '' : 'hidden'} bg-[#f8f8f8]`}>
             <button className="absolute cursor-pointer top-[1em] right-[1em]" onClick={() => { setModalLoginVisible(false); emptyFields() }}>
-                <img src="/home/x.svg" alt="fechar" className="h-[1em]" />
+                <Image src="/home/x.svg" alt="fechar" className="h-[1em]" />
             </button>
 
             <form onSubmit={(e) => submitLogin(e)} className="flex flex-col p-[2em] py-[1em] w-[100%] max-[490px]:p-[1em]">
-                <img src="/home/boy_on_a_phone.svg" alt="Entrar na sua conta" className="h-[20em] mx-auto" />
+                <Image src="/home/boy_on_a_phone.svg" alt="Entrar na sua conta" className="h-[20em] mx-auto" />
                 <fieldset className="flex flex-col mx-[10%]">
                     <legend className="font-bold mb-[1em]">Login</legend>
                     <section className="flex flex-col gap-[.25em] mb-[1em]">

@@ -1,9 +1,7 @@
-import App from "@/src/App";
 import { cookies } from "next/headers";
-import { createUser, createUserCookie, emailExists, getRefreshedData, getUserCookie, loginUser, User } from "@repo/ui/model/User";
+import { createUser, createUserCookie, emailExists, loginUser, User } from "@repo/ui/model/User";
 
 import { redirect, RedirectType } from "next/navigation";
-import { getStatement } from "@repo/ui/model/Transaction";
 
 import StoreAppWrapper from "@/src/StoreAppWrapper";
 import { getLoggedUser } from "@repo/ui/serverActions";

@@ -3,16 +3,16 @@
 import ButtonSecondary from "@repo/ui/components/ButtonSecondary/index";
 import Input from "@repo/ui/components/Input/index";
 import { isPassSecure } from "@repo/ui/model/utils/str.ts";
-import { LoadedPageInfo } from "@repo/ui/serverActions/index";
 import { resetAccountErrFields, setAccountErrField, updateAccountInfo } from "@repo/ui/store/reducers/AccountReducer";
 import { AppDispatch, useAppSelector } from "@repo/ui/store/store";
+import Image from "next/image";
 import { FormEvent, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 
 
-export default function AccountPage({ updateUserInfo, loadPageInfo }: {
+export default function AccountPage({ updateUserInfo }: {
     updateUserInfo: (id: number, name: string, pass: string) => Promise<void>,
-    loadPageInfo: () => LoadedPageInfo
+    
 }) {
 
     const nameRef = useRef<HTMLInputElement>(null);
@@ -75,7 +75,7 @@ export default function AccountPage({ updateUserInfo, loadPageInfo }: {
     return <section className="flex max-[850px]:flex-col w-[100%]">
         <section className="flex-1">
             <h2 className="text-[1.25em] font-bold mb-[1em]">Minha conta</h2>
-            <img src="/Adjustments.svg" alt="Ajustes" className="w-[100%] max-[850px]:hidden" />
+            <Image src="/Adjustments.svg" alt="Ajustes" className="w-[100%] max-[850px]:hidden" />
         </section>
         <form className="flex-1" onSubmit={(e) => formSubmission(e)}>
 
@@ -101,7 +101,7 @@ export default function AccountPage({ updateUserInfo, loadPageInfo }: {
                 Salvar Alterações
             </ButtonSecondary>
 
-            <img src="/Adjustments.svg" alt="Ajustes" className="w-[100%] mt-[1em] min-[851px]:hidden" />
+            <Image src="/Adjustments.svg" alt="Ajustes" className="w-[100%] mt-[1em] min-[851px]:hidden" />
         </form>
     </section>
 }

@@ -12,7 +12,7 @@ export default function StoreAppWrapper({ clearLoggedUser, loadPageInfo, updateU
 }) {
     return <Provider store={store}>
         <Dashboard clearLoggedUser={clearLoggedUser} loadPageInfo={loadPageInfo}>
-            <AccountPage loadPageInfo={loadPageInfo} updateUserInfo={updateUserInfo} />
+            <AccountPage updateUserInfo={updateUserInfo} />
         </Dashboard> 
     </Provider>
 }
