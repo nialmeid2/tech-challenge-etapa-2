@@ -1,5 +1,4 @@
 import Container from "@repo/ui/components/Container";
-import Image from "next/image";
 
 
 export default function HomeFooter() {
@@ -19,11 +18,11 @@ export default function HomeFooter() {
             </ul>
             <ul className="flex flex-col justify-between gap-[1em] text-center max-[671px]:text-left">
                 <li><h2 className="font-bold">Desenvolvido por Alura</h2></li>
-                <li><Image src="/home/brand_white.svg" alt="Byte Bank" className="mx-auto max-[671px]:mx-[0]" /></li>
+                <li><img src="/home/brand_white.svg" alt="Byte Bank" className="mx-auto max-[671px]:mx-[0]" /></li>
                 <li className="flex justify-center gap-[1.5ch] max-[671px]:justify-start">
-                    <Image src="/home/instagram.svg" alt="Instagram da Bytebank" className="h-[2.5em]" />
-                    <Image src="/home/whatsapp.svg" alt="Whatsapp da Bytebank" className="h-[2.5em]" />
-                    <Image src="/home/youtube.svg" alt="Canal do youtube da Bytebank" className="h-[2.5em]" />
+                    <img src="/home/instagram.svg" alt="Instagram da Bytebank" className="h-[2.5em]" />
+                    <img src="/home/whatsapp.svg" alt="Whatsapp da Bytebank" className="h-[2.5em]" />
+                    <img src="/home/youtube.svg" alt="Canal do youtube da Bytebank" className="h-[2.5em]" />
                 </li>
             </ul>
         </Container>
