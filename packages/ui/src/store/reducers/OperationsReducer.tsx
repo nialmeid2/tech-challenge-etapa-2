@@ -150,13 +150,14 @@ const operationSlice = createSlice({
             })
             .addCase(createOperation.pending, (state) => {
                 state.errFields = defaultFields();
-                state.errList = {};
+                state.errList = {};                             
             })
             .addMatcher(isAnyOf(getUserStatement.fulfilled, createOperation.fulfilled),
                 (state, action) => {
                     state.statetement = action.payload.statement;
                     state.sessionUser = action.payload.loggedUser;
                     state.graphData = action.payload.graphData;
+                    state.attachment = undefined; // so the attachment goes away from the screen   
                 })
             .addMatcher(isAnyOf(getUserStatement.rejected, createOperation.rejected, loadNextPage.rejected, removeTransactionById.rejected,
                 addFilters.rejected, editTransaction.rejected),

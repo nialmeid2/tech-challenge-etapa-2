@@ -3,13 +3,13 @@ import { ButtonHTMLAttributes, useRef, useState } from "react";
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
     accept: string,
     multiple: boolean,
-    saveBase64Attachment: (attachment: string | ArrayBuffer | null | undefined) => void
+    saveBase64Attachment: (attachment: string | ArrayBuffer | null | undefined) => void,    
 }
 
 export default function FileUploader({accept, multiple, saveBase64Attachment, ...rest}: Props) {
 
     const fileRef = useRef<HTMLInputElement>(null);
-
+    
     const [showPreview, setShowPreview] = useState(false);
     const [chosenFile, setChosenFile] = useState<File>();
     const [errorMsg, setErrorMsg] = useState('');

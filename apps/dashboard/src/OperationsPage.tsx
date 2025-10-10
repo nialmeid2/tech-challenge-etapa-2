@@ -11,7 +11,7 @@ import { User } from "@repo/ui/model/User";
 import { LoadedPageInfo } from "@repo/ui/serverActions/index";
 import { addErrField, createOperation, saveAttachment } from "@repo/ui/store/reducers/OperationsReducer";
 import { AppDispatch, useAppSelector } from "@repo/ui/store/store";
-import { FormEvent, useRef } from "react"
+import { FormEvent, useEffect, useRef, useState } from "react"
 import { useDispatch } from "react-redux";
 
 export default function OperationsPage({ createAdditiveOperation, createSubtractiveOperation, loadPageInfo }: {
@@ -29,6 +29,8 @@ export default function OperationsPage({ createAdditiveOperation, createSubtract
     const attachment = useAppSelector(s => s.operationSlice.attachment);
 
 
+    const [refreshUploader, setRefreshUploader] = useState(false);
+
 
     function submitOperation(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -36,7 +38,6 @@ export default function OperationsPage({ createAdditiveOperation, createSubtract
         if (!user)
             return;
 
-        valueRef.current!.value = valueRef.current!.value.replaceAll(/[^\d]/g, '');
         const formattedValue = +valueRef.current!.value;
         const transactionType = typeRef.current?.value;
         let isValid = true;
@@ -55,6 +56,7 @@ export default function OperationsPage({ createAdditiveOperation, createSubtract
 
         if (attachment) {
             finishSubmittingOperation(transactionType as TransactionTypes, formattedValue, attachment);
+            setRefreshUploader(true);
         } else {
             finishSubmittingOperation(transactionType as TransactionTypes, formattedValue, undefined);            
         }
@@ -100,6 +102,12 @@ export default function OperationsPage({ createAdditiveOperation, createSubtract
         }
     }
 
+    useEffect(() => {
+        if (refreshUploader) {
+            setRefreshUploader(false)
+        }
+    }, [refreshUploader]);
+
     return <form className="flex flex-col w-[100%]" onSubmit={(e) => submitOperation(e)}>
 
         <h2 className="text-[1.25em] font-bold mb-[1em]">Nova Transação</h2>
@@ -122,9 +130,9 @@ export default function OperationsPage({ createAdditiveOperation, createSubtract
             <label htmlFor={'img'}>Comprovante</label>
             
 
-            <FileUploader accept=".jpg, .jpeg, .png, .gif, .bmp, .tiff, .webp, .svg, .avif, .heic, .heif" multiple={false} 
+            {!refreshUploader && <FileUploader accept=".jpg, .jpeg, .png, .gif, .bmp, .tiff, .webp, .svg, .avif, .heic, .heif" multiple={false} 
                 saveBase64Attachment={(attach) => dispatch(saveAttachment(attach))} className="border-green-bytebank-dark bg-grey-bytebank-light"
-                />
+                /> }
 
             {errFields.img && <span className="text-red-bytebank-dark font-bold">{errFields.img}</span>}
         </div>
