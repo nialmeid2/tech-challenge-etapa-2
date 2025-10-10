@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
     /* config options here */
     assetPrefix: '/home-static',
     
+    output: 'standalone'
 };
 
 export default nextConfig;

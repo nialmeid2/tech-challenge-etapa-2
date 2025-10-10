@@ -1,13 +1,13 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["DATABASE_URL", "SALT_ROUNDS"],
+  "globalEnv": ["DATABASE_URL", "SALT_ROUNDS", "DOMAIN_HOME", "DOMAIN_DASHBOARD", "DOMAIN_TRANSACTIONS", "DOMAIN_INVESTMENTS", "DOMAIN_ACCOUNT"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"],
-      "env": ["DOMAIN_HOME", "DOMAIN_DASHBOARD", "DOMAIN_TRANSACTIONS", "DOMAIN_INVESTMENTS", "DOMAIN_ACCOUNT"]
+      "env": ["DOMAIN_HOME", "DOMAIN_DASHBOARD", "DOMAIN_TRANSACTIONS", "DOMAIN_INVESTMENTS", "DOMAIN_ACCOUNT", "DATABASE_URL", "SALT_ROUNDS"]
     },
     "lint": {
       "dependsOn": ["^lint"]
@@ -17,7 +17,8 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["DOMAIN_HOME", "DOMAIN_DASHBOARD", "DOMAIN_TRANSACTIONS", "DOMAIN_INVESTMENTS", "DOMAIN_ACCOUNT", "DATABASE_URL", "SALT_ROUNDS"]
     }
   }
 }
