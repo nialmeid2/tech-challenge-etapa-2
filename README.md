@@ -8,7 +8,7 @@ Como rodar esse projeto localmente:
 
 1. Instale o docker desktop na sua máquina e deixe ele rodando. Vá nesse link: https://www.docker.com/ . A versão grátis é suficiente
 
-2. Com o docker instalado e aberto, crie o arquivo docker-compose.yml com o seguinte conteúdo:
+2. Com o docker instalado e aberto, crie o arquivo `docker-compose.yml` com o seguinte conteúdo:
 
 ````yaml
 
@@ -36,20 +36,20 @@ volumes:
 
 ````
 
-Obs: Onde está "Sua_senha", "Seu_user" e "Seu_bd", troque pela senha, usuário e nome de banco de dados de sua preferência. Eu coloquei como porta 5433 ao invés de 5432 pq na minha máquina já tinha o postgres instalado
+Obs: Onde está `Sua_senha`, `Seu_user` e `Seu_bd`, troque pela senha, usuário e nome de banco de dados de sua preferência. Eu coloquei como porta 5433 ao invés de 5432 pq na minha máquina já tinha o postgres instalado. Lembre bem dos valores escolhidos, pois eles serão importantes depois
 
 3. Use o comando `docker compose up -d`
 
 4. Na linha de comando, use `yarn install` para instalar as dependências.
 
-5. Crie um arquivo `.env` no diretório raiz da aplicação. É nele que estará contido tanto a string de conexão com o postgres (DATABASE_URL) quanto a complexidade da sua SaltKey para hashear a senha do usuário (SALT_ROUNDS), mas evite um número mto grande para que a aplicação não fique irresponsiva; Por questões de segurança, arquivos .env nunca são subidos para o repositório remoto
+5. Crie um arquivo `.env` no diretório raiz da aplicação. É nele que estará contido tanto a string de conexão com o postgres (DATABASE_URL) quanto a complexidade da sua SaltKey para hashear a senha do usuário (SALT_ROUNDS), mas evite um número mto grande para que a aplicação não fique irresponsiva; Por questões de segurança, arquivos .env nunca são subidos para o repositório remoto. 
 
-	1. Exemplo de string de conexão no arquivo .env: `DATABASE_URL="postgresql://postgres:MinhaSenha3%40%40@localhost:5432/bank_db?schema=public"`
+	1. Exemplo de string de conexão no arquivo .env: `DATABASE_URL="postgresql://Seu_User:Sua_senha@localhost:5433/Seu_bd?schema=public"`. O usuário, a senha e o bd devem corresponder aos criados no docker-compose.yml
 	2. Exemplo de SALT_ROUNDS no .env: `SALT_ROUNDS=6`
 	
-6. Copie o `.env` da raiz para o diretório de todos os apps que o integram a aplicação (localizados em `/apps/nome-do-microfrontend)` exceto a root. Depois de fazer a cópia, pode apagar do diretório raiz
+6. Copie o `.env` da raiz do projeto para o diretório raiz de todos os apps que o integram a aplicação (localizados em `/apps/nome-do-microfrontend)`, exceto a root. Depois de fazer a cópia, pode apagar o `.env` do diretório raiz
 
-7. Crie um .env no raiz da aplicação root (`/apps/root`) com o seguinte conteúdo
+7. Crie um `.env` no raiz da aplicação root (`/apps/root`) com o seguinte conteúdo
 
 ````.env
 
