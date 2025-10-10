@@ -12,15 +12,21 @@ export default function TailwindWrapper() {
 
     if (!isClient)
         return <head>
-            <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>            
+            <script>
+                @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Slab:wght@100..900&display=swap');
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         </head>
 
     // This will cause a hydration error, but some styles will only be properly rendered if the client has to fetch some extra styles. 
     // Fully hydrated server side style won`t render properly
     return <head>
+        <script>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Slab:wght@100..900&display=swap');
+        </script>
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
         <style type="text/tailwindcss">
-            {`
+            {`                
                 @custom-variant dark (&:where(.dark, .dark *));
 
                 @theme {
